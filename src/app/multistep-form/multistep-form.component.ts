@@ -8,12 +8,22 @@ type Step = 'personalInfo' | 'loginInfo'
   selector: 'app-multistep-form',
   template: `
     <ng-container [ngSwitch]="currentStep$ | async">
+      <ion-list class="ion-margin-bottom">
+        <ion-item>
+          <ion-label>
+            <h3>User Form Value</h3>
+            <p>{{ userForm.value | json }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
       <app-personal-info
         *ngSwitchCase="'personalInfo'"
         [startingForm]="userForm.get('personalInfo').value"
         (subformInitialized)="subformInitialized('personalInfo', $event)"
         (changeStep)="changeStep('personalInfo', 'forward')"
       ></app-personal-info>
+
       <app-login-info
         *ngSwitchCase="'loginInfo'"
         [startingForm]="userForm.get('loginInfo').value"
