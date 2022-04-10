@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core'
-import { FormBuilder, FormGroup } from '@angular/forms'
+import { Component } from '@angular/core'
+import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { BehaviorSubject } from 'rxjs'
 
 type Step = 'personalInfo' | 'loginInfo'
@@ -12,46 +12,52 @@ type Step = 'personalInfo' | 'loginInfo'
         <ion-item>
           <ion-label>
             <h3>User Form Value</h3>
-            <p>{{ userForm.value | json }}</p>
+            <p class="ion-text-wrap">{{ userForm.value | json }}</p>
           </ion-label>
         </ion-item>
       </ion-list>
 
       <app-personal-info
         *ngSwitchCase="'personalInfo'"
-        [startingForm]="userForm.get('personalInfo').value"
-        (subformInitialized)="subformInitialized('personalInfo', $event)"
-        (changeStep)="changeStep('personalInfo', 'forward')"
+        [baseForm]="getFormGroup('personalInfo')"
+        (changeStep)="changeStep('personalInfo', $event)"
       ></app-personal-info>
 
       <app-login-info
         *ngSwitchCase="'loginInfo'"
-        [startingForm]="userForm.get('loginInfo').value"
-        (subformInitialized)="subformInitialized('loginInfo', $event)"
-        (changeStep)="changeStep('loginInfo', 'back')"
-        (submitForm)="submitForm()"
+        [baseForm]="getFormGroup('loginInfo')"
+        (changeStep)="changeStep('loginInfo', $event)"
       ></app-login-info>
+
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button (click)="submitForm()">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
     </ng-container>
   `,
 })
-export class MultiStepFormComponent implements OnInit {
-  userForm: FormGroup
-  private currentStepBs = new BehaviorSubject<Step>('personalInfo')
+export class MultiStepFormComponent {
+  currentStep$ = new BehaviorSubject<Step>('personalInfo')
+  userForm = this.fb.group({
+    personalInfo: this.fb.group({
+      firstName: ['', [Validators.required]],
+      lastName: '',
+    }),
+    loginInfo: this.fb.group({
+      username: ['', [Validators.required]],
+      password: ['', [Validators.required]],
+    }),
+  })
 
   constructor(private fb: FormBuilder) {}
 
-  get currentStep$() {
-    return this.currentStepBs.asObservable()
+  getFormGroup(key: Step): FormGroup | null {
+    const formGroup = this.userForm.get(key)
+    return formGroup instanceof FormGroup ? formGroup : null
   }
 
-  ngOnInit() {
-    this.userForm = this.fb.group({
-      personalInfo: null,
-      loginInfo: null,
-    })
-  }
-
-  subformInitialized(name: string, group: FormGroup) {
+  subformInitialized(name: Step, group: FormGroup) {
     this.userForm.setControl(name, group)
   }
 
@@ -59,19 +65,19 @@ export class MultiStepFormComponent implements OnInit {
     switch (currentStep) {
       case 'personalInfo':
         if (direction === 'forward') {
-          this.currentStepBs.next('loginInfo')
+          this.currentStep$.next('loginInfo')
         }
         break
       case 'loginInfo':
         if (direction === 'back') {
-          this.currentStepBs.next('personalInfo')
+          this.currentStep$.next('personalInfo')
         }
         break
     }
   }
 
   submitForm() {
-    const formValues = this.userForm.value
-    // submit the form with a service
+    console.log('Form Validation', this.userForm.valid)
+    console.log('Form Value', this.userForm.value)
   }
 }

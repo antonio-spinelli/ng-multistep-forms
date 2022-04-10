@@ -1,32 +1,29 @@
-import { OnInit, Input, Output, EventEmitter, Component } from '@angular/core'
+import { Input, Output, EventEmitter, Component, OnInit, AfterViewInit, AfterContentInit, AfterContentChecked } from '@angular/core'
 import { FormGroup, FormBuilder } from '@angular/forms'
 
 @Component({
   selector: 'app-personal-info',
-  template: `TODO`,
+  template: `
+    <ion-list class="ion-margin-bottom" [formGroup]="baseForm">
+      <ion-item>
+        <ion-label>First Name</ion-label>
+        <ion-input formControlName="firstName"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Last Name</ion-label>
+        <ion-input formControlName="lastName"></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <ion-button class="ion-float-right" (click)="doChangeStep()">Next</ion-button>
+  `,
 })
-export class PersonalInfoComponent implements OnInit {
-  @Input() startingForm: FormGroup
-  @Output() subformInitialized = new EventEmitter<FormGroup>()
-  @Output() changeStep = new EventEmitter<void>()
-  personalInfoForm: FormGroup
-
-  constructor(private fb: FormBuilder) {}
-
-  ngOnInit() {
-    if (this.startingForm) {
-      this.personalInfoForm = this.startingForm
-    } else {
-      this.personalInfoForm = this.fb.group({
-        firstName: '',
-        lastName: '',
-        // ... continue with the other fields
-      })
-    }
-    this.subformInitialized.emit(this.personalInfoForm)
-  }
+export class PersonalInfoComponent {
+  @Input() baseForm: FormGroup
+  @Output() changeStep = new EventEmitter<'forward' | 'back'>()
 
   doChangeStep() {
-    this.changeStep.emit()
+    this.changeStep.emit('forward')
   }
 }
