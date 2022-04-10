@@ -1,0 +1,7 @@
+{
+  "name": "ng-multistep-forms",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
